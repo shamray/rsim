@@ -29,9 +29,20 @@ struct environment
 
   void event_person_died()
   {}
+
+  std::random_device rd;
+  std::mt19937 gen{ rd() };
+
+  environment(environment&&) = default;
+  environment& operator=(environment&&) = default;
 };
 
-auto generate_population(environment& env)
+struct population_distribution
+{
+  vector<int> intervals;
+  vector<int> weights;
+};
+auto generate_population(environment& env, const population_distribution& distribution)
 {
   constexpr auto size = 1000000;
 
@@ -39,15 +50,12 @@ auto generate_population(environment& env)
 
 int main()
 {
-  std::random_device rd;
-  std::mt19937 gen(rd());
-
-  auto env = environment {};
+  environment env {};
   //cout << fixed;
   cout.precision(4);
   //for (environment env = {}; *env.current <= date{ 1993, Jan, 1 }; ++env.current)
   for (auto i = 0; i < 1000; ++i)
   {
-    cout << env.life_expectancy.male(gen) << endl;
+    cout << env.life_expectancy.male(env.gen) << endl;
   }
 }
