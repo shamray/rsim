@@ -6,6 +6,17 @@
 using namespace boost::gregorian;
 using namespace std;
 
+namespace utils { namespace random
+{
+  auto& generator()
+  {
+    static std::random_device rd;
+    static std::mt19937 gen{ rd() };
+
+    return gen;
+  }
+}}
+
 struct person
 {
   date birth_date;
@@ -30,9 +41,6 @@ struct environment
   void event_person_died()
   {}
 
-  std::random_device rd;
-  std::mt19937 gen{ rd() };
-
   environment(environment&&) = default;
   environment& operator=(environment&&) = default;
 };
@@ -42,6 +50,7 @@ struct population_distribution
   vector<int> intervals;
   vector<int> weights;
 };
+
 auto generate_population(environment& env, const population_distribution& distribution)
 {
   constexpr auto size = 1000000;
@@ -50,12 +59,12 @@ auto generate_population(environment& env, const population_distribution& distri
 
 int main()
 {
-  environment env {};
+  auto env = environment {};
   //cout << fixed;
   cout.precision(4);
   //for (environment env = {}; *env.current <= date{ 1993, Jan, 1 }; ++env.current)
   for (auto i = 0; i < 1000; ++i)
   {
-    cout << env.life_expectancy.male(env.gen) << endl;
+    cout << env.life_expectancy.male(utils::random::generator()) << endl;
   }
 }
