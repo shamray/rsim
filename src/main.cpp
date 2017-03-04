@@ -17,6 +17,18 @@ namespace utils { namespace random
   }
 }}
 
+namespace utils { namespace datetime 
+{
+  auto years_ago(double years, date today)
+  {
+    const auto full_years = boost::numeric_cast<unsigned short>( ceil(years) );
+    const auto months = boost::numeric_cast<unsigned short>(round((years - full_years) * 12));
+
+    assert(months >= 1 && months <= 12);
+
+    return date{ full_years, months, today.day() };
+  }
+}}
 enum class gender_t
 {
   male,
@@ -62,9 +74,23 @@ public:
     
   }
 
-  auto operator()()
+  auto operator()(date today)
   {
-    return person{};
+    const auto age = age_distribution_(utils::random::generator());
+    const auto birth_date = utils::datetime::years_ago(age, today);
+    const auto gender = generate_gender();
+
+    return person{ birth_date, gender, -1 };
+  }
+
+private:
+  auto generate_gender() -> gender_t
+  {
+    auto is_male = gender_distribution_(utils::random::generator());
+    if (is_male)
+      return gender_t::male;
+    else
+      return gender_t::female;
   }
 
 
