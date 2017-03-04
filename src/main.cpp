@@ -17,10 +17,10 @@ namespace utils { namespace random
   }
 }}
 
-struct person
+enum class gender_t
 {
-  date birth_date;
-  int life_expectancy_t;
+  male,
+  female
 };
 
 struct environment
@@ -45,10 +45,32 @@ struct environment
   environment& operator=(environment&&) = default;
 };
 
-struct population_distribution
+struct person
 {
-  vector<int> intervals;
-  vector<int> weights;
+  date birth_date;
+  gender_t gender;
+  int life_expectancy;
+};
+
+class population_distribution
+{
+public:
+  population_distribution(const vector<double>& intervals, const vector<double>& weights, double male_percentage)
+    : age_distribution_(begin(intervals), end(intervals), begin(weights))
+    , gender_distribution_(male_percentage)
+  {
+    
+  }
+
+  auto operator()()
+  {
+    return person{};
+  }
+
+
+private:
+  piecewise_linear_distribution<double> age_distribution_;
+  bernoulli_distribution gender_distribution_;
 };
 
 auto generate_population(environment& env, const population_distribution& distribution)
