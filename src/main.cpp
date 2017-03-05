@@ -83,6 +83,14 @@ public:
     return person{ birth_date, gender, -1 };
   }
 
+  auto operator()()
+  {
+    const auto age = age_distribution_(utils::random::generator());
+    const auto gender = generate_gender();
+
+    return std::make_tuple(age, gender);
+  }
+
 private:
   auto generate_gender() -> gender_t
   {
@@ -110,9 +118,11 @@ int main()
   auto env = environment {};
   //cout << fixed;
   cout.precision(4);
+  auto d = population_distribution{ {0, 30, 60, 70, 110}, {0, 2, 2.5, 2, 0}, 0.4 };
   //for (environment env = {}; *env.current <= date{ 1993, Jan, 1 }; ++env.current)
   for (auto i = 0; i < 1000; ++i)
   {
-    cout << env.life_expectancy.male(utils::random::generator()) << endl;
+    cout << get<0>(d()) << endl;
+    //cout << env.life_expectancy.male(utils::random::generator()) << endl;
   }
 }
