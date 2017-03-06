@@ -167,9 +167,8 @@ private:
   normal_distribution<> female_;
 };
 
-auto generate_population(environment& env, population_distribution& distribution, life_expectancy_distribution& led)
+auto generate_population(environment& env, population_distribution& distribution, int size, life_expectancy_distribution& led)
 {
-  constexpr auto size = 1000;
   for (auto i = 0; i < size; ++i)
   {
     auto id = ++env.id;
@@ -191,7 +190,7 @@ int main()
 
   cout << "generating population..." << endl;
 
-  generate_population(env, pd, led);
+  generate_population(env, pd, 1000, led);
 
   for (; *env.current <= date{ 2075, Jan, 1 }; ++env.current)
   {
@@ -205,4 +204,5 @@ int main()
     if (env.current->month() == Jan)
       cout << *env.current << "  " << env.population.size() << endl;
   }
+  cout << "finished" << endl;
 }
