@@ -174,6 +174,9 @@ auto generate_population(environment& env, population_distribution& distribution
   {
     auto id = ++env.id;
     env.population[id] = distribution(*env.current);
+
+    auto death_date = led(*env.current, env.population[id].gender);
+    env.events.insert(make_pair(death_date, [&env, id]() { env.population.erase(id); }));
   }
 }
 
