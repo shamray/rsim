@@ -2,7 +2,7 @@
 #include <boost/range/iterator_range.hpp>
 
 #include <random>
-#include <unordered>
+#include <unordered_map>
 #include <iostream>
 
 using namespace boost::gregorian;
@@ -167,11 +167,14 @@ private:
   normal_distribution<> female_{ 74.03, 15 };
 };
 
-auto generate_population(environment& env, population_distribution& distribution)
+auto generate_population(environment& env, population_distribution& distribution, life_expectancy_distribution& led)
 {
   constexpr auto size = 1000000;
   for (auto i = 0; i < size; ++i)
-    env.population[++id] = distribution(*env.current);
+  {
+    auto id = ++env.id;
+    env.population[id] = distribution(*env.current);
+  }
 }
 
 int main()
@@ -182,7 +185,7 @@ int main()
   auto pd = population_distribution{ {0, 30, 60, 70, 110}, {2, 2.5, 1.5, 1, 0}, 0.4 };
   auto led = life_expectancy_distribution{ 61.56, 74.03 };
 
-  generate_population(env, pd);
+  generate_population(env, pd, led);
 
   for (; *env.current <= date{ 2005, Jan, 1 }; ++env.current)
   {
