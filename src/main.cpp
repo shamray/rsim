@@ -163,8 +163,8 @@ public:
   }
 
 private:
-  normal_distribution<> male_{ 61.56, 15 };
-  normal_distribution<> female_{ 74.03, 15 };
+  normal_distribution<> male_;
+  normal_distribution<> female_;
 };
 
 auto generate_population(environment& env, population_distribution& distribution, life_expectancy_distribution& led)
