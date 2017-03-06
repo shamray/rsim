@@ -169,7 +169,7 @@ private:
 
 auto generate_population(environment& env, population_distribution& distribution, life_expectancy_distribution& led)
 {
-  constexpr auto size = 100000;
+  constexpr auto size = 1000;
   for (auto i = 0; i < size; ++i)
   {
     auto id = ++env.id;
@@ -177,6 +177,7 @@ auto generate_population(environment& env, population_distribution& distribution
 
     auto death_date = led(*env.current, env.population[id].gender);
     env.events.insert(make_pair(death_date, [&env, id]() { env.population.erase(id); }));
+    cout << death_date << endl;
   }
 }
 
