@@ -2,7 +2,7 @@
 #include <boost/range/iterator_range.hpp>
 
 #include <random>
-#include <list>
+#include <unordered>
 #include <iostream>
 
 using namespace boost::gregorian;
@@ -84,7 +84,8 @@ struct environment
 {
   month_iterator current = date{ 1991, Sep, 1 };
   double annual_birth_rate = 0;
-  list<person> population;
+  long id = 0;
+  unordered_map<long, person> population;
   multimap<date, function<void()>> events;
 
   void event_person_born()
@@ -170,7 +171,7 @@ auto generate_population(environment& env, population_distribution& distribution
 {
   constexpr auto size = 1000000;
   for (auto i = 0; i < size; ++i)
-    env.population.push_back(distribution(*env.current));
+    env.population[++id] = distribution(*env.current);
 }
 
 int main()
