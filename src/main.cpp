@@ -198,5 +198,8 @@ int main()
     }
 
     env.events.erase(env.events.begin(), env.events.upper_bound(*env.current));
+
+    if (env.current->month() == Jan)
+      cout << *env.current << "  " << env.population.size() << endl;
   }
 }
