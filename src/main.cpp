@@ -23,8 +23,8 @@ namespace utils { namespace datetime
 {
   auto years_ago(double years, date today)
   {
-    const auto full_years = boost::numeric_cast<unsigned short>( ceil(years) );
-    const auto months = boost::numeric_cast<unsigned short>(round((years - full_years) * 12));
+    const auto full_years = boost::numeric_cast<unsigned short>( floor(years) );
+    const auto months = boost::numeric_cast<unsigned short>(round((years - full_years) * 11) + 1);
 
     assert(months >= 1 && months <= 12);
 
@@ -46,8 +46,8 @@ namespace utils { namespace datetime
 
   auto years_after(double years, date today)
   {
-    const auto full_years = boost::numeric_cast<unsigned short>(ceil(years));
-    const auto months = boost::numeric_cast<unsigned short>(round((years - full_years) * 12));
+    const auto full_years = boost::numeric_cast<unsigned short>(floor(years));
+    const auto months = boost::numeric_cast<unsigned short>(round((years - full_years) * 11) + 1);
 
     assert(months >= 1 && months <= 12);
 
