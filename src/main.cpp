@@ -188,9 +188,11 @@ int main()
   auto pd = population_distribution{ {0, 30, 60, 70, 110}, {2, 2.5, 1.5, 1, 0}, 0.4 };
   auto led = life_expectancy_distribution{ 61.56, 74.03 };
 
+  cout << "generating population..." << endl;
+
   generate_population(env, pd, led);
 
-  for (; *env.current <= date{ 2005, Jan, 1 }; ++env.current)
+  for (; *env.current <= date{ 2075, Jan, 1 }; ++env.current)
   {
     for (auto&& event_pair : boost::make_iterator_range(env.events.begin(), env.events.upper_bound(*env.current)))
     {
