@@ -145,8 +145,8 @@ class life_expectancy_distribution
 {
 public:
   life_expectancy_distribution(double male_mean, double female_mean)
-    : male_{ male_mean, 15 }
-    , female_{ female_mean, 15 }
+    : male_{ male_mean, 12 }
+    , female_{ female_mean, 12 }
   {}
 
   auto operator()(gender_t gender)
@@ -169,7 +169,7 @@ private:
 
 auto generate_population(environment& env, population_distribution& distribution, life_expectancy_distribution& led)
 {
-  constexpr auto size = 1000000;
+  constexpr auto size = 100000;
   for (auto i = 0; i < size; ++i)
   {
     auto id = ++env.id;
