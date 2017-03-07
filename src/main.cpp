@@ -184,7 +184,7 @@ public:
 
   auto operator()()
   {
-    return round(dist_(utils::random::generator()));
+    return boost::numeric_cast<int>( round(dist_(utils::random::generator())) );
   }
 
 private:
@@ -218,7 +218,7 @@ int main()
 
   cout << "generating population..." << endl;
 
-  generate_population(env, pd, 1000, led);
+  generate_population(env, pd, 10000, led, sd);
 
   for (; *env.current <= date{ 2075, Jan, 1 }; ++env.current)
   {
