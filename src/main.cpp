@@ -1,5 +1,6 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/range/iterator_range.hpp>
+#include <boost/range/numeric.hpp>
 
 #include <random>
 #include <unordered_map>
@@ -230,7 +231,7 @@ int main()
     env.events.erase(env.events.begin(), env.events.upper_bound(*env.current));
 
     if (env.current->month() == Jan)
-      cout << *env.current << "  " << env.population.size() << endl;
+      cout << *env.current << "  " << env.population.size() << " \t" << boost::accumulate(env.population, 0, [](int s, auto&& pp) { return s + pp.second.salary; }) << endl;
   }
   cout << "finished" << endl;
 }
