@@ -73,6 +73,7 @@ namespace utils { namespace datetime
     return date{ year,  birthday.month(), birthday.day() };
   }
 }}
+
 enum class gender_t
 {
   male,
@@ -83,7 +84,8 @@ struct person
 {
   date birth_date;
   gender_t gender;
-  int life_expectancy;
+
+  int salary = 0;
 };
 
 struct environment
@@ -120,7 +122,7 @@ public:
     const auto birth_date = utils::datetime::years_ago(age, today);
     const auto gender = generate_gender();
 
-    return person{ birth_date, gender, -1 };
+    return person{ birth_date, gender };
   }
 
   auto operator()()
@@ -173,7 +175,23 @@ private:
   normal_distribution<> female_;
 };
 
-auto generate_population(environment& env, population_distribution& distribution, int size, life_expectancy_distribution& led)
+class salary_distribution
+{
+public:
+  salary_distribution(int mean, int d)
+    : dist_{ mean, d }
+  {}
+
+  auto operator()()
+  {
+    return round(dist_(utils::random::generator()));
+  }
+
+private:
+  normal_distribution<> dist_;
+};
+
+auto generate_population(environment& env, population_distribution& distribution, int size, life_expectancy_distribution& led, salary_distribution& sd)
 {
   for (auto i = 0; i < size; ++i)
   {
@@ -182,7 +200,10 @@ auto generate_population(environment& env, population_distribution& distribution
 
     auto death_date = led(*env.current, env.population[id].gender);
     env.events.insert(make_pair(death_date, [&env, id]() { env.population.erase(id); }));
-    cout << death_date << endl;
+
+    auto salary = sd();
+    auto work_start = utils::datetime::at_age(18, env.population[id].birth_date);
+    env.events.insert(make_pair(work_start, [&env, id, salary]() { env.population[id].salary = salary; }));
   }
 }
 
@@ -193,6 +214,7 @@ int main()
   auto env = environment {};
   auto pd = population_distribution{ {0, 30, 60, 70, 110}, {2, 2.5, 1.5, 1, 0}, 0.4 };
   auto led = life_expectancy_distribution{ 61.56, 74.03 };
+  auto sd = salary_distribution{ 1000, 200 };
 
   cout << "generating population..." << endl;
 
