@@ -66,6 +66,12 @@ namespace utils { namespace datetime
 
     return date{ result_year, result_month, today.day() };
   }
+
+  auto at_age(int age, date birthday)
+  {
+    auto year = boost::numeric_cast<unsigned short>(birthday.year() + age);
+    return date{ year,  birthday.month(), birthday.day() };
+  }
 }}
 enum class gender_t
 {
