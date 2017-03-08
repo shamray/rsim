@@ -249,6 +249,9 @@ private:
 
   auto satisfies(vector<date> dates_of_delivery, date mother_death_date) -> bool
   {
+    if (dates_of_delivery.empty())
+      return true;
+
     return *boost::max_element(dates_of_delivery) >= mother_death_date;
   }
 
@@ -260,6 +263,9 @@ private:
     );
     if (distance_less_than_year != age_of_delivery.end())
       return false;
+
+    if (age_of_delivery.empty())
+      return true;
 
     auto min = boost::min_element(age_of_delivery);
     auto max = boost::max_element(age_of_delivery);
