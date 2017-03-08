@@ -260,7 +260,7 @@ private:
 
   auto satisfies(vector<date> dates_of_delivery, date mother_death_date) -> bool
   {
-    return true;
+    return *boost::max_element(dates_of_delivery) >= mother_death_date;
   }
 
   auto satisfies(vector<double> age_of_delivery) -> bool
