@@ -198,7 +198,7 @@ class birth_distribution
 public:
   birth_distribution(double birth_rate_per_woman, double average_delivery_age, std::pair<int, int> fertility_age = { 16, 38 })
     : number_of_children_(birth_rate_per_woman)
-    , age_of_delivery_(average_delivery_age, 3)
+    , age_of_delivery_(average_delivery_age, 5)
     , gender_distribution_(0.5)
     , min_age_(fertility_age.first)
     , max_age_(fertility_age.second)
@@ -217,9 +217,18 @@ public:
 
   auto generate_birth_dates(date mother_birth_date, date mother_death_date) -> vector<date>
   {
+    if (mother_death_date < utils::datetime::years_after(min_age_, mother_birth_date))
+      return {};
+
+    auto number_of_children = number_of_children_(utils::random::generator());
+    auto last_delivery = utils::datetime::years_after(max_age_, mother_birth_date);
+
+    if (number_of_children >= last_delivery.year() - mother_birth_date.year())
+      number_of_children = (last_delivery.year() - mother_birth_date.year()) / 2;
+
     for (;;)
     {
-      auto age_of_delivery = generate_ages();
+      auto age_of_delivery = generate_ages(number_of_children);
       if (!satisfies(age_of_delivery))
         continue;
 
@@ -232,10 +241,10 @@ public:
   }
 
 private:
-  auto generate_ages() ->vector<double>
+  auto generate_ages(int number_of_children) ->vector<double>
   {
     auto result = vector<double>{};
-    for (auto i = 0; i < number_of_children_(utils::random::generator()); ++i)
+    for (auto i = 0; i < number_of_children; ++i)
       result.push_back(age_of_delivery_(utils::random::generator()));
     
     return result;
@@ -362,9 +371,9 @@ int main()
 
   cout << "generating population..." << endl;
 
-  generate_population(env, pd, 10000, led, sd);
+  generate_population(env, pd, 1000, led, sd);
 
-  for (; *env.current <= date{ 2075, Jan, 1 }; ++env.current)
+  for (; *env.current <= date{ 2175, Jan, 1 }; ++env.current)
   {
     for (auto&& event_pair : boost::make_iterator_range(env.events.begin(), env.events.upper_bound(*env.current)))
     {
