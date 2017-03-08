@@ -201,7 +201,7 @@ public:
     , age_of_delivery_(average_delivery_age, 3)
     , gender_distribution_(0.5)
     , min_age_(fertility_age.first)
-    , max_age_(fertility_age.first)
+    , max_age_(fertility_age.second)
   {}
 
   auto operator()(date mother_birth_date, date mother_death_date)
