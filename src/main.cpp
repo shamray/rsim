@@ -1,11 +1,17 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/numeric.hpp>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/max.hpp>
 
 #include <random>
 #include <unordered_map>
 #include <iostream>
 
+using namespace boost::accumulators;
 using namespace boost::gregorian;
 using namespace std;
 
@@ -179,17 +185,28 @@ private:
 class salary_distribution
 {
 public:
-  salary_distribution(int mean, int d)
-    : dist_{ mean, d }
+  salary_distribution(int mean, int sigma)
+    : dist_{ m(mean, sigma * sigma), s(mean, sigma * sigma) }
   {}
 
   auto operator()()
   {
-    return boost::numeric_cast<int>( round(dist_(utils::random::generator())) );
+    return boost::numeric_cast<long>( round(dist_(utils::random::generator())) );
   }
 
 private:
-  normal_distribution<> dist_;
+  auto m(double mean, double variance) -> double
+  {
+    return log(mean * mean / sqrt(variance + mean * mean));
+  }
+
+  auto s(double mean, double variance) -> double
+  {
+    return sqrt(log( 1 + variance / (mean * mean)));
+  }
+
+private:
+  lognormal_distribution<> dist_;
 };
 
 auto generate_population(environment& env, population_distribution& distribution, int size, life_expectancy_distribution& led, salary_distribution& sd)
@@ -215,7 +232,7 @@ int main()
   auto env = environment {};
   auto pd = population_distribution{ {0, 30, 60, 70, 110}, {2, 2.5, 1.5, 1, 0}, 0.4 };
   auto led = life_expectancy_distribution{ 61.56, 74.03 };
-  auto sd = salary_distribution{ 1000, 200 };
+  auto sd = salary_distribution{ 1000, 400 };
 
   cout << "generating population..." << endl;
 
@@ -233,5 +250,6 @@ int main()
     if (env.current->month() == Jan)
       cout << *env.current << "  " << env.population.size() << " \t" << boost::accumulate(env.population, 0, [](int s, auto&& pp) { return s + pp.second.salary; }) << endl;
   }
+
   cout << "finished" << endl;
 }
