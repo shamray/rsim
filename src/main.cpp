@@ -209,6 +209,14 @@ private:
   lognormal_distribution<> dist_;
 };
 
+auto retirement_age(const person& p)
+{
+  if (p.gender == gender_t::male)
+    return 60;
+  else
+    return 55;
+}
+
 auto generate_population(environment& env, population_distribution& distribution, int size, life_expectancy_distribution& led, salary_distribution& sd)
 {
   for (auto i = 0; i < size; ++i)
@@ -222,6 +230,9 @@ auto generate_population(environment& env, population_distribution& distribution
     auto salary = sd();
     auto work_start = utils::datetime::at_age(18, env.population[id].birth_date);
     env.events.insert(make_pair(work_start, [&env, id, salary]() { env.population[id].salary = salary; }));
+
+    auto retirement = utils::datetime::at_age(retirement_age(env.population[id]), env.population[id].birth_date);
+    env.events.insert(make_pair(retirement, [&env, id]() { env.population[id].salary = 0; }));
   }
 }
 
