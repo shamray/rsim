@@ -270,7 +270,7 @@ private:
 struct environment
 {
   month_iterator current = date{ 1991, Sep, 1 };
-  double annual_birth_rate = 0;
+  birth_distribution childbirth{ 2.0, 26 };
   long id = 0;
   unordered_map<long, person> population;
   multimap<date, function<void()>> events;
@@ -303,6 +303,15 @@ auto generate_population(environment& env, population_distribution& distribution
 
     auto retirement = utils::datetime::at_age(retirement_age(env.population[id]), env.population[id].birth_date);
     env.events.insert(make_pair(retirement, [&env, id]() { env.population[id].salary = 0; }));
+
+    if (env.population[id].gender == gender_t::female)
+    {
+      auto children = env.childbirth(env.population[id].birth_date, death_date);
+      for (auto&& child_birth_date : children)
+      {
+        env.events.insert(make_pair(child_birth_date, [&env, id]() {}));
+      }
+    }
   }
 }
 
