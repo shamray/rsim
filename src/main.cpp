@@ -1,6 +1,7 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/numeric.hpp>
+#include <boost/range/algorithm.hpp>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
@@ -207,6 +208,75 @@ private:
 
 private:
   lognormal_distribution<> dist_;
+};
+
+class birth_distribution
+{
+public:
+  birth_distribution(double birth_rate_per_woman, double average_delivery_age, std::pair<int> fertility_age = { 16, 38 })
+    : dist_(birth_rate_per_woman),
+    , age_of_delivery_(average_delivery_age, 3)
+    , min_age_(fertility_age.first)
+    , max_age_(fertility_age.first)
+  {}
+
+  operator()(date mother_birth_date, date mother_death_date)
+  {
+    for (;;)
+    {
+      auto age_of_delivery = generate_ages();
+      if (!satisfies(age_of_delivery))
+        continue;
+
+      auto dates_of_delivery = to_dates(age_of_delivery, mother_birth_date);
+      if (!satisfies(age_of_delivery, mother_birth_date))
+        continue;
+
+      return dates_of_delivery;
+    }
+  }
+
+private:
+  auto generate_ages() ->vector<double>
+  {
+    auto result = vector<double>{};
+    for (auto i = 0; i < number_of_children_(); ++i)
+      result.push_back(age_of_delivery_());
+    
+    return result;
+  }
+
+  auto to_dates(vector<double> age_of_delivery, date mother_birth_date) -> vector<date>
+  {
+    return age_of_delivery
+      | boost::range::adaptors::transformed([mother_birth_date](auto &&age) {return utils::datetime::years_after(age, mother_birth_date); });
+  }
+
+  auto satisfies(vector<date> dates_of_delivery, date mother_death_date) -> bool
+  {
+    return true;
+  }
+
+  auto satisfies(vector<double> age_of_delivery) -> bool
+  {
+    auto distance_less_than_year = boost::adjacent_find(
+      age_of_delivery,
+      [](auto&& x, auto &&y) { return x - y < 1; }
+    );
+    if (distance_less_than_year != age_of_delivery.end())
+      return false;
+
+    auto min = boost::min_element(age_of_delivery);
+    auto max = boost::max_element(age_of_delivery);
+
+    return min >= min_age_ && max <= max_age_;
+  }
+
+private:
+  poisson_distribution<> number_of_children_;
+  normal_distribution<> age_of_delivery_;
+  int min_age_;
+  int max_age_;
 };
 
 auto retirement_age(const person& p)
