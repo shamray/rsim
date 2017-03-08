@@ -199,11 +199,18 @@ public:
   birth_distribution(double birth_rate_per_woman, double average_delivery_age, std::pair<int, int> fertility_age = { 16, 38 })
     : number_of_children_(birth_rate_per_woman)
     , age_of_delivery_(average_delivery_age, 3)
+    , gender_distribution_(0.5)
     , min_age_(fertility_age.first)
     , max_age_(fertility_age.first)
   {}
 
   auto operator()(date mother_birth_date, date mother_death_date)
+  {
+    return generate_birth_dates(mother_birth_date, mother_death_date)
+      | boost::adaptors::transformed([&](auto &&birthday) {return person{ birthday, generate_gender() }; });
+  }
+
+  auto generate_birth_dates(date mother_birth_date, date mother_death_date) -> vector<date>
   {
     for (;;)
     {
@@ -260,9 +267,19 @@ private:
     return *min >= min_age_ && *max <= max_age_;
   }
 
+  auto generate_gender() -> gender_t
+  {
+    auto is_male = gender_distribution_(utils::random::generator());
+    if (is_male)
+      return gender_t::male;
+    else
+      return gender_t::female;
+  }
+
 private:
   poisson_distribution<> number_of_children_;
   normal_distribution<> age_of_delivery_;
+  bernoulli_distribution gender_distribution_;
   int min_age_;
   int max_age_;
 };
@@ -287,32 +304,37 @@ auto retirement_age(const person& p)
     return 55;
 }
 
+void add_person(environment& env, person new_person, life_expectancy_distribution& led, salary_distribution& sd)
+{
+  auto id = ++env.id;
+  env.population[id] = new_person;
+
+  auto death_date = led(*env.current, new_person.gender);
+  env.events.insert(make_pair(death_date, [&env, id]() { env.population.erase(id); }));
+
+  auto salary = sd();
+  auto work_start = utils::datetime::at_age(18, new_person.birth_date);
+  env.events.insert(make_pair(work_start, [&env, &p = env.population[id], salary]() { p.salary = salary; }));
+
+  auto retirement = utils::datetime::at_age(retirement_age(new_person), new_person.birth_date);
+  env.events.insert(make_pair(retirement, [&env, &p = env.population[id]]() { p.salary = 0; }));
+
+  if (new_person.gender == gender_t::female)
+  {
+    auto children = env.childbirth(new_person.birth_date, death_date);
+    for (auto&& child : children)
+    {
+      env.events.insert(make_pair(child.birth_date, [&]() { 
+        add_person(env, child, led, sd); 
+      }));
+    }
+  }
+}
+
 auto generate_population(environment& env, population_distribution& distribution, int size, life_expectancy_distribution& led, salary_distribution& sd)
 {
   for (auto i = 0; i < size; ++i)
-  {
-    auto id = ++env.id;
-    env.population[id] = distribution(*env.current);
-
-    auto death_date = led(*env.current, env.population[id].gender);
-    env.events.insert(make_pair(death_date, [&env, id]() { env.population.erase(id); }));
-
-    auto salary = sd();
-    auto work_start = utils::datetime::at_age(18, env.population[id].birth_date);
-    env.events.insert(make_pair(work_start, [&env, id, salary]() { env.population[id].salary = salary; }));
-
-    auto retirement = utils::datetime::at_age(retirement_age(env.population[id]), env.population[id].birth_date);
-    env.events.insert(make_pair(retirement, [&env, id]() { env.population[id].salary = 0; }));
-
-    if (env.population[id].gender == gender_t::female)
-    {
-      auto children = env.childbirth(env.population[id].birth_date, death_date);
-      for (auto&& child_birth_date : children)
-      {
-        env.events.insert(make_pair(child_birth_date, [&env, id]() {}));
-      }
-    }
-  }
+    add_person(env, distribution(*env.current), led, sd);
 }
 
 int main()
