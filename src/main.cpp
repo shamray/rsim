@@ -97,24 +97,6 @@ struct person
   int salary = 0;
 };
 
-struct environment
-{
-  month_iterator current = date{ 1991, Sep, 1 };
-  double annual_birth_rate = 0;
-  long id = 0;
-  unordered_map<long, person> population;
-  multimap<date, function<void()>> events;
-
-  void event_person_born()
-  {}
-
-  void event_person_died()
-  {}
-
-  environment(environment&&) = default;
-  environment& operator=(environment&&) = default;
-};
-
 class population_distribution
 {
 public:
@@ -283,6 +265,18 @@ private:
   normal_distribution<> age_of_delivery_;
   int min_age_;
   int max_age_;
+};
+
+struct environment
+{
+  month_iterator current = date{ 1991, Sep, 1 };
+  double annual_birth_rate = 0;
+  long id = 0;
+  unordered_map<long, person> population;
+  multimap<date, function<void()>> events;
+
+  environment(environment&&) = default;
+  environment& operator=(environment&&) = default;
 };
 
 auto retirement_age(const person& p)
