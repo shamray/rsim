@@ -2,6 +2,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/numeric.hpp>
 #include <boost/range/algorithm.hpp>
+#include <boost/range/adaptors.hpp>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
@@ -213,14 +214,14 @@ private:
 class birth_distribution
 {
 public:
-  birth_distribution(double birth_rate_per_woman, double average_delivery_age, std::pair<int> fertility_age = { 16, 38 })
-    : dist_(birth_rate_per_woman),
+  birth_distribution(double birth_rate_per_woman, double average_delivery_age, std::pair<int, int> fertility_age = { 16, 38 })
+    : number_of_children_(birth_rate_per_woman)
     , age_of_delivery_(average_delivery_age, 3)
     , min_age_(fertility_age.first)
     , max_age_(fertility_age.first)
   {}
 
-  operator()(date mother_birth_date, date mother_death_date)
+  auto operator()(date mother_birth_date, date mother_death_date)
   {
     for (;;)
     {
@@ -229,7 +230,7 @@ public:
         continue;
 
       auto dates_of_delivery = to_dates(age_of_delivery, mother_birth_date);
-      if (!satisfies(age_of_delivery, mother_birth_date))
+      if (!satisfies(dates_of_delivery, mother_birth_date))
         continue;
 
       return dates_of_delivery;
@@ -240,16 +241,21 @@ private:
   auto generate_ages() ->vector<double>
   {
     auto result = vector<double>{};
-    for (auto i = 0; i < number_of_children_(); ++i)
-      result.push_back(age_of_delivery_());
+    for (auto i = 0; i < number_of_children_(utils::random::generator()); ++i)
+      result.push_back(age_of_delivery_(utils::random::generator()));
     
     return result;
   }
 
   auto to_dates(vector<double> age_of_delivery, date mother_birth_date) -> vector<date>
   {
-    return age_of_delivery
-      | boost::range::adaptors::transformed([mother_birth_date](auto &&age) {return utils::datetime::years_after(age, mother_birth_date); });
+    auto result = vector<date>{};
+    boost::copy(
+      age_of_delivery
+      | boost::adaptors::transformed([mother_birth_date](auto &&age) {return utils::datetime::years_after(age, mother_birth_date); }),
+      back_inserter(result)
+    );
+    return result;
   }
 
   auto satisfies(vector<date> dates_of_delivery, date mother_death_date) -> bool
@@ -269,7 +275,7 @@ private:
     auto min = boost::min_element(age_of_delivery);
     auto max = boost::max_element(age_of_delivery);
 
-    return min >= min_age_ && max <= max_age_;
+    return *min >= min_age_ && *max <= max_age_;
   }
 
 private:
