@@ -206,8 +206,13 @@ public:
 
   auto operator()(date mother_birth_date, date mother_death_date)
   {
-    return generate_birth_dates(mother_birth_date, mother_death_date)
-      | boost::adaptors::transformed([&](auto &&birthday) {return person{ birthday, generate_gender() }; });
+    auto result = vector<person>{};
+    boost::copy(
+      generate_birth_dates(mother_birth_date, mother_death_date)
+      | boost::adaptors::transformed([&](auto &&birthday) {return person{ birthday, generate_gender() }; }),
+      back_inserter(result)
+    );
+    return result;
   }
 
   auto generate_birth_dates(date mother_birth_date, date mother_death_date) -> vector<date>
@@ -293,7 +298,7 @@ private:
 struct environment
 {
   month_iterator current = date{ 1991, Sep, 1 };
-  birth_distribution childbirth{ 2.0, 26 };
+  birth_distribution childbirth{ 2, 26 };
   long id = 0;
   unordered_map<long, person> population;
   multimap<date, function<void()>> events;
@@ -330,7 +335,10 @@ void add_person(environment& env, person new_person, life_expectancy_distributio
     auto children = env.childbirth(new_person.birth_date, death_date);
     for (auto&& child : children)
     {
-      env.events.insert(make_pair(child.birth_date, [&]() { 
+      if (child.birth_date < *env.current)
+        continue;
+
+      env.events.insert(make_pair(child.birth_date, [&env, &led, &sd, child]() { 
         add_person(env, child, led, sd); 
       }));
     }
