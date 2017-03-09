@@ -217,15 +217,7 @@ public:
 
   auto generate_birth_dates(date mother_birth_date, date mother_death_date) -> vector<date>
   {
-    if (mother_death_date < utils::datetime::years_after(min_age_, mother_birth_date))
-      return {};
-
     auto number_of_children = number_of_children_(utils::random::generator());
-    auto last_delivery = utils::datetime::years_after(max_age_, mother_birth_date);
-
-    if (number_of_children >= last_delivery.year() - mother_birth_date.year())
-      number_of_children = (last_delivery.year() - mother_birth_date.year()) / 2;
-
     for (;;)
     {
       auto age_of_delivery = generate_ages(number_of_children);
@@ -271,13 +263,6 @@ private:
 
   auto satisfies(vector<double> age_of_delivery) -> bool
   {
-    auto distance_less_than_year = boost::adjacent_find(
-      age_of_delivery,
-      [](auto&& x, auto &&y) { return x - y < 1; }
-    );
-    if (distance_less_than_year != age_of_delivery.end())
-      return false;
-
     if (age_of_delivery.empty())
       return true;
 
@@ -307,7 +292,7 @@ private:
 struct environment
 {
   month_iterator current = date{ 1991, Sep, 1 };
-  birth_distribution childbirth{ 2, 26 };
+  birth_distribution childbirth{ 2.1, 26 };
   long id = 0;
   unordered_map<long, person> population;
   multimap<date, function<void()>> events;
