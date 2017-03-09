@@ -55,6 +55,9 @@ namespace utils { namespace datetime
 
   auto years_after(double years, date today)
   {
+    if (years < 0)
+      years = 0;
+
     const auto full_years = boost::numeric_cast<unsigned short>(floor(years));
     const auto months = boost::numeric_cast<unsigned short>(round((years - full_years) * 11) + 1);
 
@@ -356,7 +359,7 @@ int main()
 
   cout << "generating population..." << endl;
 
-  generate_population(env, pd, 1000, led, sd);
+  generate_population(env, pd, 10000, led, sd);
 
   for (; *env.current <= date{ 2175, Jan, 1 }; ++env.current)
   {
