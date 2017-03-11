@@ -1,6 +1,10 @@
 #pragma once
 
 #include "person.h"
+
+#include "utils/random.h"
+#include "utils/datetime.h"
+
 #include <random>
 
 namespace sim

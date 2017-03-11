@@ -1,12 +1,12 @@
-#include "utils/random.h"
-#include "utils/datetime.h"
-
 #include "distribution/population.h"
 #include "distribution/life_expectancy.h"
 #include "distribution/salary.h"
 #include "distribution/birth.h"
 
 #include "person.h"
+
+#include "utils/random.h"
+#include "utils/datetime.h"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/range/iterator_range.hpp>
