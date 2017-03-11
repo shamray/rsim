@@ -1,3 +1,6 @@
+#include "utils/random.h"
+#include "utils/datetime.h"
+
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/numeric.hpp>
@@ -17,74 +20,7 @@ using namespace boost::accumulators;
 using namespace boost::gregorian;
 using namespace std;
 
-namespace utils { namespace random
-{
-  auto& generator()
-  {
-    static std::random_device rd;
-    static std::mt19937 gen{ rd() };
 
-    return gen;
-  }
-}}
-
-namespace utils { namespace datetime 
-{
-  auto years_ago(double years, date today)
-  {
-    const auto full_years = boost::numeric_cast<unsigned short>( floor(years) );
-    const auto months = boost::numeric_cast<unsigned short>(round((years - full_years) * 11) + 1);
-
-    assert(months >= 1 && months <= 12);
-
-    auto result_year = boost::numeric_cast<unsigned short>(today.year() - full_years);
-    auto result_month = boost::numeric_cast<unsigned short>(0);
-
-    if (months > today.month())
-    {
-      result_month = months + 1 - today.month();
-      result_year--;
-    }
-    else
-    {
-      result_month = today.month() + 1 - months;
-    }
-
-    return date{ result_year, result_month, today.day() };
-  }
-
-  auto years_after(double years, date today)
-  {
-    if (years < 0)
-      years = 0;
-
-    const auto full_years = boost::numeric_cast<unsigned short>(floor(years));
-    const auto months = boost::numeric_cast<unsigned short>(round((years - full_years) * 11) + 1);
-
-    assert(months >= 1 && months <= 12);
-
-    auto result_year = boost::numeric_cast<unsigned short>(today.year() + full_years);
-    auto result_month = boost::numeric_cast<unsigned short>(0);
-
-    if (months + today.month() >= 12)
-    {
-      result_month = abs(months - today.month()) + 1;
-      result_year++;
-    }
-    else
-    {
-      result_month = today.month() + months;
-    }
-
-    return date{ result_year, result_month, today.day() };
-  }
-
-  auto at_age(int age, date birthday)
-  {
-    auto year = boost::numeric_cast<unsigned short>(birthday.year() + age);
-    return date{ year,  birthday.month(), birthday.day() };
-  }
-}}
 
 enum class gender_t
 {

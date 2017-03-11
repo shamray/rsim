@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(rsim)
+project(Rsim)
 
 # Boost
 set(BOOST_ROOT $ENV{BOOST_ROOT})
