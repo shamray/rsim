@@ -1,6 +1,8 @@
 #include "utils/random.h"
 #include "utils/datetime.h"
 
+#include "person.h"
+
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/numeric.hpp>
@@ -20,21 +22,8 @@ using namespace boost::accumulators;
 using namespace boost::gregorian;
 using namespace std;
 
+using namespace sim;
 
-
-enum class gender_t
-{
-  male,
-  female
-};
-
-struct person
-{
-  date birth_date;
-  gender_t gender;
-
-  int salary = 0;
-};
 
 class population_distribution
 {
