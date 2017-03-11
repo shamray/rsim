@@ -2,7 +2,7 @@
 find_package(Boost COMPONENTS date_time)
 
 # Target definition
-add_executable(rsim main.cpp random.cpp)
+add_executable(rsim main.cpp utils/random.cpp)
 
 # Compile-time dependencies
 include_directories(${Rsim_SOURCE_DIR}/include)
