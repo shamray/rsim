@@ -6,7 +6,7 @@ namespace utils { namespace datetime
 {
   using namespace boost::gregorian;
 
-  auto years_ago(double years, date today)
+  inline auto years_ago(double years, date today)
   {
     const auto full_years = boost::numeric_cast<unsigned short>( floor(years) );
     const auto months = boost::numeric_cast<unsigned short>(round((years - full_years) * 11) + 1);
@@ -29,7 +29,7 @@ namespace utils { namespace datetime
     return date{ result_year, result_month, today.day() };
   }
 
-  auto years_after(double years, date today)
+  inline auto years_after(double years, date today)
   {
     if (years < 0)
       years = 0;
@@ -55,7 +55,7 @@ namespace utils { namespace datetime
     return date{ result_year, result_month, today.day() };
   }
 
-  auto at_age(int age, date birthday)
+  inline auto at_age(int age, date birthday)
   {
     auto year = boost::numeric_cast<unsigned short>(birthday.year() + age);
     return date{ year,  birthday.month(), birthday.day() };
