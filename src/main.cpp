@@ -4,14 +4,13 @@
 #include "distribution/population.h"
 #include "distribution/life_expectancy.h"
 #include "distribution/salary.h"
+#include "distribution/birth.h"
 
 #include "person.h"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/numeric.hpp>
-#include <boost/range/algorithm.hpp>
-#include <boost/range/adaptors.hpp>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
@@ -27,104 +26,6 @@ using namespace boost::gregorian;
 using namespace std;
 
 using namespace sim;
-
-
-
-class birth_distribution
-{
-public:
-  birth_distribution(double birth_rate_per_woman, double average_delivery_age, std::pair<int, int> fertility_age = { 16, 38 })
-    : number_of_children_(birth_rate_per_woman)
-    , age_of_delivery_(average_delivery_age, 5)
-    , gender_distribution_(0.5)
-    , min_age_(fertility_age.first)
-    , max_age_(fertility_age.second)
-  {}
-
-  auto operator()(date mother_birth_date, date mother_death_date)
-  {
-    auto result = vector<person>{};
-    boost::copy(
-      generate_birth_dates(mother_birth_date, mother_death_date)
-      | boost::adaptors::transformed([&](auto &&birthday) {return person{ birthday, generate_gender() }; }),
-      back_inserter(result)
-    );
-    return result;
-  }
-
-  auto generate_birth_dates(date mother_birth_date, date mother_death_date) -> vector<date>
-  {
-    auto number_of_children = number_of_children_(utils::random::generator());
-    for (;;)
-    {
-      auto age_of_delivery = generate_ages(number_of_children);
-      if (!satisfies(age_of_delivery))
-        continue;
-
-      auto dates_of_delivery = to_dates(age_of_delivery, mother_birth_date);
-      if (!satisfies(dates_of_delivery, mother_birth_date))
-        continue;
-
-      return dates_of_delivery;
-    }
-  }
-
-private:
-  auto generate_ages(int number_of_children) ->vector<double>
-  {
-    auto result = vector<double>{};
-    for (auto i = 0; i < number_of_children; ++i)
-      result.push_back(age_of_delivery_(utils::random::generator()));
-    
-    return result;
-  }
-
-  auto to_dates(vector<double> age_of_delivery, date mother_birth_date) -> vector<date>
-  {
-    auto result = vector<date>{};
-    boost::copy(
-      age_of_delivery
-      | boost::adaptors::transformed([mother_birth_date](auto &&age) {return utils::datetime::years_after(age, mother_birth_date); }),
-      back_inserter(result)
-    );
-    return result;
-  }
-
-  auto satisfies(vector<date> dates_of_delivery, date mother_death_date) -> bool
-  {
-    if (dates_of_delivery.empty())
-      return true;
-
-    return *boost::max_element(dates_of_delivery) >= mother_death_date;
-  }
-
-  auto satisfies(vector<double> age_of_delivery) -> bool
-  {
-    if (age_of_delivery.empty())
-      return true;
-
-    auto min = boost::min_element(age_of_delivery);
-    auto max = boost::max_element(age_of_delivery);
-
-    return *min >= min_age_ && *max <= max_age_;
-  }
-
-  auto generate_gender() -> gender_t
-  {
-    auto is_male = gender_distribution_(utils::random::generator());
-    if (is_male)
-      return gender_t::male;
-    else
-      return gender_t::female;
-  }
-
-private:
-  poisson_distribution<> number_of_children_;
-  normal_distribution<> age_of_delivery_;
-  bernoulli_distribution gender_distribution_;
-  int min_age_;
-  int max_age_;
-};
 
 struct environment
 {
