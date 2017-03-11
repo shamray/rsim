@@ -5,20 +5,17 @@
 
 namespace sim
 {
-  using std::vector;
-  using boost::gregorian::date;
-
   class population_distribution
   {
   public:
-    population_distribution(const vector<double>& intervals, const vector<double>& weights, double male_percentage)
+    population_distribution(const std::vector<double>& intervals, const std::vector<double>& weights, double male_percentage)
       : age_distribution_(begin(intervals), end(intervals), begin(weights))
       , gender_distribution_(male_percentage)
     {
 
     }
 
-    auto operator()(date today)
+    auto operator()(boost::gregorian::date today)
     {
       const auto age = age_distribution_(utils::random::generator());
       const auto birth_date = utils::datetime::years_ago(age, today);
