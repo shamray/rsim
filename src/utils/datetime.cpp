@@ -1,7 +1,7 @@
 #include "utils/datetime.h"
 
 
-namespace utils { namespace datetime 
+namespace utils::datetime 
 {
   auto years_ago(double years, date today) -> date
   {
@@ -57,4 +57,4 @@ namespace utils { namespace datetime
     auto year = boost::numeric_cast<unsigned short>(birthday.year() + age);
     return date{ year,  birthday.month(), birthday.day() };
   }
-}}
+}

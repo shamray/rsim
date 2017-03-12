@@ -1,6 +1,6 @@
 #include <random>
 
-namespace utils { namespace random
+namespace utils::random
 {
   auto generator()->std::mt19937&;
-}}
+}

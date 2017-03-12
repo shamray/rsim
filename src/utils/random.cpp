@@ -1,7 +1,7 @@
 #include "utils/random.h"
 #include <random>
 
-namespace utils { namespace random
+namespace utils::random
 {
   auto generator() -> std::mt19937&
   {
@@ -10,5 +10,4 @@ namespace utils { namespace random
 
     return gen;
   }
-
-}}
+}
