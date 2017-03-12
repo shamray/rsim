@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 project(Rsim)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
+add_definitions(-D_HAS_AUTO_PTR_ETC=1)
+
 # Boost
 set(BOOST_ROOT $ENV{BOOST_ROOT})
 set(BOOST_LIBRARYDIR "stage64")
